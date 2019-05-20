@@ -1,11 +1,11 @@
-SSS
+Solution State Scanning (SSS)
 ==============================
-[//]: # (Badges)
-[![Travis Build Status](https://travis-ci.org/REPLACE_WITH_OWNER_ACCOUNT/SSS.png)](https://travis-ci.org/REPLACE_WITH_OWNER_ACCOUNT/SSS)
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/REPLACE_WITH_APPVEYOR_LINK/branch/master?svg=true)](https://ci.appveyor.com/project/REPLACE_WITH_OWNER_ACCOUNT/SSS/branch/master)
-[![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/SSS/branch/master/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/SSS/branch/master)
+Python package to perform solution state scanning and generate ABSINTH parameter files. Finalization of this repository is ongoing (including tests, final code changes etc). This code accompanies the paper
 
-Python package to perform solution state scanning and generate ABSINTH parameter files
+"Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning" from the Holehouse and (Sukenik)[http://sukeniklab.com] labs.
+
+For more information 
+
 
 ### Copyright
 
