@@ -1,6 +1,7 @@
-Solution State Scanning (SSS)
+SolutionSpaceScanner
 ==============================
-Python package to perform solution state scanning and generate ABSINTH parameter files. Finalization of this repository is ongoing (including tests, final code changes etc). This code accompanies the paper
+SolutionSpaceScanner is a Python package implemented to generate ABSINTH parameter files that can be used for running solution space
+scanning simulations. Finalization of this repository is ongoing (including tests, final code changes etc). This code accompanies the paper
 
 "Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning" from the [Holehouse](http://holehouselab.com) and [Sukenik](http://sukeniklab.com) labs. 
 
