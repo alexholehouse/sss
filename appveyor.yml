@@ -38,7 +38,7 @@ install:
 build: false
 
 test_script:
-  - pytest -v --cov=sss sss\\tests
+  - pytest -v --cov=solutionspacescanner solutionspacescanner\\tests
 
 on_success:
   - codecov

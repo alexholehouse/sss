@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=sss
+set SPHINXPROJ=solutionspacescanner
 
 if "%1" == "" goto help
 

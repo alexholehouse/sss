@@ -1,5 +1,5 @@
 from . configs import VALID, VALID_2_ONELETTER, SPACER_1
-from sss import offset_calculator
+from solutionspacescanner import offset_calculator
 
 
 # ******************************************************************

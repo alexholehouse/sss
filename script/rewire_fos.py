@@ -21,10 +21,10 @@ import numpy as np
 import argparse
 
 # import local configuration files
-from sss.configs import VALID, VALID_2_ONELETTER, SPACER_1
-from sss import fos_calcs
-from sss import io_functions
-import sss
+from solutionspacescanner.configs import VALID, VALID_2_ONELETTER, SPACER_1
+from solutionspacescanner import fos_calcs
+from solutionspacescanner import io_functions
+import solutionspacescanner
 
 
 
@@ -46,7 +46,7 @@ if __name__=="__main__":
 
 
     print("------------------------------------------------")
-    print("        rewire_fos version [%s] (%s)              " % (sss.__version__, sss.release_date))
+    print("        rewire_fos version [%s] (%s)              " % (solutionspacescanner.__version__, solutionspacescanner.release_date))
     print("------------------------------------------------")
 
     args = parser.parse_args()

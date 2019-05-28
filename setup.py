@@ -21,7 +21,7 @@ except:
 
 setup(
     # Self-descriptive entries which should always be present
-    name='sss',
+    name='solutionspacescanner',
     author='Alex Holehouse & Shahar Sukenik',
     author_email='alex.holehouse@wustl.edu',
     description=short_description[0],
@@ -32,12 +32,12 @@ setup(
     license='LGPLv3',
 
     # Which Python importable modules should be included when your package is installed
-    packages=['sss', "sss.tests"],
+    packages=['solutionspacescanner', "solutionspacescanner.tests"],
 
     # Optional include package data to ship with your package
     # Comment out this line to prevent the files from being packaged with your software
     # Extend/modify the list to include/exclude other items as need be
-    package_data={'sss': ["data/*.dat"]
+    package_data={'solutionspacescanner': ["data/*.dat"]
                   },
 
     # Allows `setup.py test` to work correctly with pytest

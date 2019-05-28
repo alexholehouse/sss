@@ -1,18 +1,16 @@
 """
-sss.py
+SolutionSpaceScanner
 Python package to perform solution state scanning and generate ABSINTH parameter files
-
-Handles the primary functions
 """
 
-release_date = 'Oct 2018'
-from . _version import get_versions
+# Add imports here
+from .solutionspacescanner import *
+
+# Handle versioneer
+from ._version import get_versions
 versions = get_versions()
 __version__ = versions['version']
 __git_revision__ = versions['full-revisionid']
 del get_versions, versions
 
 
-if __name__ == "__main__":
-    # Do something if this file is invoked on its own
-    pass
