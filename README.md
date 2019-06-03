@@ -3,6 +3,7 @@ SolutionSpaceScanner
 [//]: # (Badges)
 [![Build Status](https://travis-ci.org/holehouse-lab/solutionspacescanner.svg?branch=master)](https://travis-ci.org/holehouse-lab/solutionspacescanner)
 [![Documentation Status](https://readthedocs.org/projects/solutionspacescanner/badge/?version=latest)](https://solutionspacescanner.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/holehouse-lab/solutionspacescanner/branch/master/graph/badge.svg)](https://codecov.io/gh/holehouse-lab/solutionspacescanner)
 
 
 SolutionSpaceScanner is a Python package implemented to generate ABSINTH parameter files that can be used for running solution space
