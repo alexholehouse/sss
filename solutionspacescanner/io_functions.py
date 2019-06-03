@@ -27,11 +27,16 @@ def readfile(filename):
 
 # ******************************************************************
 def error_exit(msg):
+    """
+    Function that takes an error message, prints it in a nicely formatted way
+    and then triggers and exit with status 1
+
+    """
     print("")
-    print("###################################################################################################################################################")
+    print("###############################################################")
     print("ERROR:  %s"  % str((msg)))
     print("")
-    print("###################################################################################################################################################")
+    print("###############################################################")
     exit(1)
 
 
@@ -74,7 +79,12 @@ def parse_residue_string(rstring):
             valid_res.append('PEP_BB')
             continue
 
-        valid_res.append(r)
+        # finally having parsed all these edge cases we append the 'r' to the valid residues list
+        else:
+            valid_res.append(r)
+
+    if len(valid_res) == 0:
+        error_exit("No residues were provided to change [%s].."%(rstring))
 
     return valid_res
 

@@ -1,0 +1,19 @@
+
+
+Version 1.0 written December 2017
+- Initial version (basically a simple local script, no delta percentage WSM (W_{solv}^{max}) mode generated yet
+
+Updated 1.1 September 2018:
+- rewire_fos provides a simple command-line tool to automatically update the free-energies of solvation (FOS) values
+in an ABSINTH parameter file
+- Include delta percentage WSM (W_{solv}^{max}) mode
+
+Updated Oct 2018:
+- Fixed bug when residues not found in sequence..
+
+Updated Oct 2018:
+- Fixed bug in how backbone is treated when checking for valid input
+
+Updated May 2019:
+- updated for TravisCI integration
+- renamed rewire_fos.py to sss.py as the runner script
