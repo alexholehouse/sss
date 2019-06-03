@@ -11,9 +11,12 @@
 # rewire_fos provides a simple command-line tool to automatically update the free-energies of solvation (FOS) values
 # in an ABSINTH parameter file
 #
-# Updated 1.2 Oct 2018 - fixed bug when residues not found in sequence..
+# Updated Oct 2018 - fixed bug when residues not found in sequence..
 #
-# Updated 1.3 Oct 2018 - fixed bug in how backbone is treated when checking for valid input
+# Updated Oct 2018 - fixed bug in how backbone is treated when checking for valid input
+#
+# Updated May 2019 - updated for TravisCI integration
+#
 #
 
 import os
