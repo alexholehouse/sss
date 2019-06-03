@@ -42,7 +42,7 @@ install:
 
 
 script:
-  - pytest -v --cov=sss sss/tests/
+  - pytest -v --cov=solutionspacescanner solutionspacescanner/tests/
 
 notifications:
     email: false
