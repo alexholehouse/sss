@@ -1,1 +1,0 @@
-../../script/rewire_fos.py

@@ -4,20 +4,24 @@ About
 
 SolutionSpaceScanner implements a method used in the paper "*Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning*" by `Alex S. Holehouse <https://www.holehouselab.com/>`_ and `Shahar Sukenik <https://www.sukeniklab.com/>`_.
 
-CAMPARI is an all-atom simulation engine that facilitates both Monte Carlo and molecular dynamics simulations [1]. CAMPARI provides the reference implementation for the ABSINTH implicit solvent paradigm, a model in which peptide-solvent interactions are described using a direct mean-field model (DMFI). The ABSINTH Hamiltonian describes the energy function that defines the instantaneous potential energy of a given configuration. 
+CAMPARI is an all-atom simulation engine that facilitates both Monte Carlo and molecular dynamics simulations [1]. CAMPARI provides the reference implementation for the ABSINTH implicit solvent paradigm, a model in which peptide-solvent interactions are described using a direct mean-field (DMFI) model. The ABSINTH potential energy function (which we refer to as the Hamiltonian for convenience) describes the energy function that defines the instantaneous potential energy of a given configuration. 
 
 The ABSINTH Hamiltonian is defined as:
 
 :math:`E_{total}=W_{solv}+U_{LJ}+W_{el}+U_{corr}`
 
-Here 
+Here the :math:`W_{solv}` term reflects the DMFI and provides the energetic contribution associated with the solvation of distinct chemical groups. The reference implementation of ABSINTH assumes an aqeous environment, and the associated energies associated with the DMFI are parameterized as such. However, these transfer free energies can be modified to reflect changes to the solution, allowing the 'chemical' nature of the underlying implicit solvent model to be changed in an arbitrary manner.
 
-To do a developmental install, type
+We leverage this tunability to modulate the underlying free energies of solvation associated with the DMFI to create chemically distinct solution conditions. This allows us to ask how different types of solution environments may influence the conformational biases associated with a given polypeptide
 
-``pip install -e .``
 
-Dependencies
+Installation
 ************************
+
+**SoutionSpaceScanner** can be installed using ``pip``. Specifically, after downloading the package, navigate to the package directory in your terminal, ensure you are in the appropriate environment, and run:
+
+``pip install .``
+
 
 You need to install ``numpy``
 

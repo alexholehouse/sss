@@ -39,6 +39,9 @@ setup(
     # Extend/modify the list to include/exclude other items as need be
     package_data={'solutionspacescanner': ["data/*.dat"]
                   },
+    install_requires=[
+        "numpy>=1.12.0"],
+
 
     # Allows `setup.py test` to work correctly with pytest
     setup_requires=[] + pytest_runner,
