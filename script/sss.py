@@ -105,9 +105,14 @@ if __name__=="__main__":
             io_functions.error_exit("Must provide a valid amino acid sequence when using --fos_percentage")
             
         FOS_MODE = 3
-
+        
+        # figure out which of the residues that have been requested are actually relevant
         updated_residues = fos_calcs.identify_used_residues(args.sequence, residues)
+
+        # compute the fixed offset that means the delta percentage W_{solv}^{max} is true
         FOS_offset = fos_calcs.compute_value_from_percentage(args.sequence, float(args.fos_percentage), updated_residues)        
+
+        # set the FOS value to the default 
         FOS_value = 0 # default
 
 
