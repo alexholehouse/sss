@@ -8,6 +8,8 @@ SolutionSpaceScanner - a tool for titrating in solution space
 
 SolutionSpaceScanner is a Python package for constructing distinct solvent environments that are then interoperative with the ABSINTH implicit solvent paradigm. It provides a way to generate a customized parameter file which can be read by the CAMPARI all-atom simulation engine to assess how changes to solute-solvent interactions may influence the conformational behaviour of proteins.
 
+The SolutionSpaceScanner documentation is still being finalized... 
+
 
 .. toctree::
    :maxdepth: 1

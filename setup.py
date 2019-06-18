@@ -45,6 +45,7 @@ setup(
 
     # Allows `setup.py test` to work correctly with pytest
     setup_requires=[] + pytest_runner,
+    scripts=['scripts/sss'], 
 
     # Additional entries you may want simply uncomment the lines you want and fill in the data
     # author_email='me@place.org',      # Author email
