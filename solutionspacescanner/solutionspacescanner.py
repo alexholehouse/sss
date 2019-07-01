@@ -5,7 +5,7 @@ Python package to perform solution state scanning and generate ABSINTH parameter
 Handles the primary functions
 """
 
-release_date = 'May 2019'
+release_date = 'July 2019'
 from . _version import get_versions
 versions = get_versions()
 __version__ = versions['version']

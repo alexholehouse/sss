@@ -7,9 +7,9 @@ Installation
 
 Installation of the **SolutionStateScanner** scanner package provides the commandlinetool ``sss``, a general tool for rewiring ABINSTH parameter files.
 
-To install **SolutionStateScanner** download the early release candidate zip file from [..]. Once downloaded, this file be used to install **SolutionSpaceScanner** installed using ``pip`` by running ::
+To install **SolutionStateScanner** download the early release candidate `zip file from here <https://www.holehouselab.com/s/solutionspacescanner.zip>`_ [*]_. Once downloaded, this file can be used to install **SolutionSpaceScanner** installed using ``pip`` by running ::
 
-	$ pip install [...]
+	$ pip install solutionspacescanner.zip
 
 To ensure installation was succesfull you can run the following command from your terminal::
 
@@ -79,5 +79,7 @@ References
 
 [1] Holehouse, A.S., and Sukenik, S. (2019) Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning (bioRxiv link: [to be posted])
 
+
+.. [*] Note that ``solutionspacescanner`` will be added to PyPI in the near future.
 
 
