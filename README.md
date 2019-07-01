@@ -12,7 +12,7 @@ scanning simulations. Finalization of this repository is ongoing (including test
 "Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning" from the [Holehouse](http://holehouselab.com) and [Sukenik](http://sukeniklab.com) labs. 
 
 ### Documentation
-Documentation (installation and usage) can [be found here](https://solutionspacescanner.readthedocs.io/en/latest/index.html].
+Documentation (installation and usage) can [be found here](https://solutionspacescanner.readthedocs.io/en/latest/index.html).
 
 ### Copyright
 
