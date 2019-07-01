@@ -18,7 +18,7 @@ To ensure installation was succesfull you can run the following command from you
 This should print the following information to the screen ::
 
 	------------------------------------------------
-	  SolutionSpaceScanner (sss) version [<SOME VERSION>] (June 2019)
+	  SolutionSpaceScanner (sss) version [0.0.0+19.g5bd4abb] (July 2019)
 	------------------------------------------------
 	usage: sss [-h] [-f F] [-r R] [--fos_offset FOS_OFFSET]
 	           [--fos_value FOS_VALUE] [--fos_percentage FOS_PERCENTAGE]
