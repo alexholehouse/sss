@@ -6,13 +6,15 @@ SolutionSpaceScanner
 [![codecov](https://codecov.io/gh/holehouse-lab/solutionspacescanner/branch/master/graph/badge.svg)](https://codecov.io/gh/holehouse-lab/solutionspacescanner)
 
 
+
 **SolutionSpaceScanner** is a Python package implemented to generate ABSINTH parameter files that can be used for running solution space
 scanning simulations. Finalization of this repository is ongoing (including tests, final code changes etc). 
 
 This code accompanies the paper [Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning](https://www.biorxiv.org/content/10.1101/752378v1) initially posted to biorxiv on August 30th 2019 from the [Holehouse](http://holehouselab.com) and [Sukenik](http://sukeniklab.com) labs. 
 
 ### Documentation
-[Documentation can be found here](https://solutionspacescanner.readthedocs.io/en/latest/index.html).
+Documentation (installation and usage) can [be found here](https://solutionspacescanner.readthedocs.io/en/latest/index.html).
+
 
 ### Copyright
 
