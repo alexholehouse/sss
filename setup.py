@@ -37,8 +37,7 @@ setup(
     # Optional include package data to ship with your package
     # Comment out this line to prevent the files from being packaged with your software
     # Extend/modify the list to include/exclude other items as need be
-    package_data={'solutionspacescanner': ["data/*.dat"]
-                  },
+    package_data={'solutionspacescanner': ['data/'], 'solutionspacescanner': ['data/test_data/']},                  
     install_requires=[
         "numpy>=1.12.0"],
 

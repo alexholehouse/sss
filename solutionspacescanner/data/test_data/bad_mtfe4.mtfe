@@ -1,0 +1,31 @@
+# Urea MTFE values from Bolen
+#
+# Units in in cal/mol/res
+# Note scalar here is 7
+# This is the empyrically parameterized scalar that
+# relates this file to give 1 M in terms of modulation 
+# to the ABSINTH FOS model.
+
+SCALAR  7
+ALA  -4.69
+CYS  0
+ASP  3.55
+GLU  0.62
+PHE  -83.11
+HIS  -50.51
+PRO  -17.65
+ILE  -38.43
+LYS  -22.76
+LEU  -54.57
+MET  -48.34
+ASN  -38.79
+PRO  -17.65
+GLN  -54.81
+ARG  -21.17
+SER  -20.56
+THR  -22.09
+VAL  -21.65
+TRP  -141.46
+TYR  -45.08
+PEP_BB  -39
+PRO_PEP_BB  -39

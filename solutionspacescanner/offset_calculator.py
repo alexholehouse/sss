@@ -1,13 +1,19 @@
+## sss - a package for performing computational solution space scanning
+##
+## Written by Alex Holehouse 
+## Developed by Alex Holehouse and Shahar Sukenik
+## See LICSENCE for copyright information
+##
+## offset_calculator.py
+## Contains functionality 
+##
+##
+
 import numpy as np
 import os
 import errno
 import argparse
-
-## ABOUT:
-##
-## offset_calculator provides a set of functions used by rewire_fos, but can also be used seperately
-## for other calculations
-##
+from . import configs
 
 
 ################################################################################################
@@ -16,153 +22,249 @@ import argparse
 ####                                                                                        ####
 ################################################################################################
 
-AAs = ['A','C','D','E','F','G','H','I','K','L','M','N','P','Q','R','S','T','V','W','Y']
-
-AA2INT = {'A':0, 'C':1, 'D':2,'E':3,'F':4,'G':5,'H':6,'I':7,'K':8,'L':9,'M':10,'N':11,'P':12,'Q':13,'R':14,'S':15,'T':16,'V':17,'W':18,'Y':19}
-INT2AA = {0:'A', 1:'C', 2:'D', 3:'E', 4:'F', 5:'G', 6:'H', 7:'I', 8:'K', 9:'L', 10:'M', 11:'N', 12:'P', 13:'Q', 14:'R', 15:'S', 16:'T', 17:'V', 18:'W', 19:'Y'}
-
-# MAX SASA for sidechain and backbone in each residue, as measured from 
-# ACE-XX-NME dipeptide
-SASA_MAX = np.array([[7.581871795654296875e+01, 7.607605743408203125e+01],
-                     [1.154064483642578125e+02, 6.787722015380859375e+01],
-                     [1.302558288574218750e+02, 7.182710266113281250e+01],
-                     [1.617985687255859375e+02, 6.805746459960937500e+01],
-                     [2.093871002197265625e+02, 6.598278808593750000e+01],
-                     [0.000000000000000000e+00, 1.149752731323242188e+02],
-                     [1.808149414062500000e+02, 6.750666809082031250e+01],
-                     [1.727196502685546875e+02, 6.034464645385742188e+01],
-                     [2.058575897216796875e+02, 6.871156311035156250e+01],
-                     [1.720360412597656250e+02, 6.451246643066406250e+01],
-                     [1.847660064697265625e+02, 6.778076934814453125e+01],
-                     [1.427441253662109375e+02, 6.680493164062500000e+01],
-                     [1.342914733886718750e+02, 5.583909606933593750e+01],
-                     [1.733262939453125000e+02, 6.660184478759765625e+01],
-                     [2.364875640869140625e+02, 6.673487854003906250e+01],
-                     [9.587133026123046875e+01, 7.287202453613281250e+01],
-                     [1.309214324951171875e+02, 6.421310424804687500e+01],
-                     [1.431178131103515625e+02, 6.172962188720703125e+01],
-                     [2.545694122314453125e+02, 6.430991363525390625e+01],
-                     [2.225183105468750000e+02, 7.186695098876953125e+01]])
-
-# baseline sidechain FOS values as taken from the ABINSTH implicit solvent model. Note
-# the FOS of G is set to 0 here (no sidechain).
-FOS_baseline   = {'A':1.9, 
-                  'C':-1.2, 
-                  'D':-107.3,
-                  'E':-107.3, 
-                  'F':-0.8, 
-                  'G': 0,
-                  'H':-10.3,
-                  'I':2.2, 
-                  'K':-100.9, 
-                  'L':2.3, 
-                  'M':-1.4, 
-                  'N':-9.7, 
-                  'P':2.0,  
-                  'Q':-9.4, 
-                  'R':-100.9,   
-                  'S':-5.1,  
-                  'T':-5.0, 
-                  'V':2.0, 
-                  'W':-5.9,
-                  'Y':-6.1}
-
-# backbone baseline FOS, as taken from the ABSINTH implicit solvent model
-backbone_baseline = -10.1
-
 
 ## ...........................................................................
 ##
-def sanitize_sequence(s):
-    """
-    Function that parses protein string (one-letter amino acid sequence) and verifies each residue 
-    can be correctly dealt with
-
+def get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset):
     """
 
-    seq = s.upper()
-    for a in seq:
-        if a not in AAs:
-            raise Exception('---- Found invalid amino acid (%s)'%(a))
 
-    return seq
+    Function that given an dictionary defining the number of each type of SG in the 
+    system  (${SG_count_dictionar}), the set of SGs to be updated (updated_SGs_to_modify)
+    and an offset that can be either a dictionary of values or a single fixed value, this
+    function calculates the W_solv_max for the protein associated with the SG_count_dictionary.
 
-## ...........................................................................
-##
-def get_overal_group_SASA(resvector, group):
-    """
-    Returns the max possible SASA associated with one or more amino acids as defined by
-    the 'group' string. Note 'B' in group means backbone.
+    Note there is some logic involved here, which includes
 
-    This function isn't ACTUALLY used for the main FOS calculation but I kept it because it may be useful.
+    (1) Correcting backbone SASA based on the presence of a sidechain (note we don't right now
+        correct the sidechain SASA for the presence of a backbone, but assume is not a major contributor
+        - this may be something to address later
 
-    """
-    total = 0.0
+    (2) the peptide backbone is dealt with explicitly by counting the number of proline and non-proline
+        residues and then calculating the backbone contribution accordingly. Because glycine is not explicitly
+        included we also calculate the number of glycines based on TOTAL number of backbone moeities minus
+        number of sidechain-continaing SGs.
 
-    for AA in group:
+    Parameters
+    ...........
+    SG_count_dictionary : dict
+        Dictionary where key-value pairs are solvation group (SG) and count.
 
-        # if backbone is the group...
-        if group == 'B':
-            total = 0
-            for AA_IDX in range(0,20):
-
-                # increment total by number of residue of type A * max possible available backbone associated with
-                # that residue type (SASA_MAX[AA_IDX][1] -> 1 means backbone
-                total = total + resvector[AA_IDX]*SASA_MAX[AA_IDX][1]
-
-        else:
-            AA_IDX = AA2INT[AA]
-
-            # increment total by number of residue of type A * max possible available backbone associated with
-            # that residue type (SASA_MAX[AA_IDX][0] -> 0 means sidechain
-            total = total + resvector[AA_IDX]*SASA_MAX[AA_IDX][0]
-        
-    return total
-
-
-def print_sanity_checks(resvector,seq, offset_vector):
-
-    print("Running offset_calculator....")
-    print("")
-    print("Seq: %s" %  seq)
-    print("Offsets: %s" % (str(offset_vector)))
-    print("")
-    max_fos = 0
-    for AA in AAs:
-        
-        AA_IDX=AA2INT[AA]
-
-        BB_corection_factor = (SASA_MAX[AA_IDX][1]/SASA_MAX[5][1]) # BB correction for presence of sidechain
-        print("Residue %s total GTFE = %3.6f" % (AA, FOS_baseline[INT2AA[AA_IDX]] + backbone_baseline*BB_corection_factor))
-        max_fos = max_fos + resvector[AA_IDX]*FOS_baseline[INT2AA[AA_IDX]] + resvector[AA_IDX]*backbone_baseline*BB_corection_factor
-
-    print("")
-    print("Total MTFE: %5.5f kcal/mol" % max_fos)
-    print("")
-
-        
-
-
-## ...........................................................................
-##
-def get_group_specific_FOS(resvector, group, offset):
-    """
-    Group should be a string of residues
+    updated_SGs_to_modify : list
+        Non-redundant list of SGs that are a subset of the SGs in SG_count_dictionary.
+    
+    offset : float OR dict
+        Either a fixed value applied to every SG in in updated_SGs_to_modify list OR a dictionary
+        where EVERY SG in SG_count_dictionary MUST be able to look up what's going on!
+    
 
     """
     max_fos = 0.0
+    non_gly = 0
 
+
+    # for each solvation group in the protein
+    for SG in SG_count_dictionary:
+
+        # allows this function to take offset as EITHER
+        # a fixed value or a fixed value
+        if isinstance(offset, dict):
+            local_offset = offset[SG]
+        else:
+            local_offset = offset
+
+        # .......................................................................................
+        # sidechain
+            
+        # we deal with backbones explicitly below...
+        if SG == 'PEP_BB' or SG == 'PEP_PRO_BB':
+            continue
+
+        # if that group is in the set to modify
+        if SG in updated_SGs_to_modify:            
+            max_fos = max_fos + SG_count_dictionary[SG]*(configs.FOS_baseline[SG] + local_offset);
+        else:
+            max_fos = max_fos + SG_count_dictionary[SG]*(configs.FOS_baseline[SG])
+
+        # .......................................................................................
+        # backbone for non-glycines
+            
+        # compute a correction factor - this is the SASA of the backbone of the SG of interest
+        # divided by the SASA of a GLY backbone residue
+        BB_correction_factor = (configs.SASA_MAX[SG][1]/configs.SASA_MAX['GLY'][1]) # BB correction for presence of sidechain
+        
+        # PROLINE
+        # if we found a proline... rest of this is about proline backbone stuff
+        if SG == 'PRO':
+
+            # update offset IF a variable offset was provided (if not stick with fixed value)
+            if isinstance(offset, dict):
+                local_offset = offset['PEP_PRO_BB']
+
+            # if we are meant to updated PEP_PRO_BB...
+            if 'PEP_PRO_BB' in updated_SGs_to_modify:
+                max_fos = max_fos + SG_count_dictionary['PEP_PRO_BB']*(configs.FOS_baseline['PEP_PRO_BB'] + local_offset)*BB_correction_factor
+            else:
+                max_fos = max_fos + SG_count_dictionary['PEP_PRO_BB']*(configs.FOS_baseline['PEP_PRO_BB'])*BB_correction_factor
+
+        # NON PROLINE
+        # else we found a non-proline residue which must have a backbone residue
+        else:
+
+            non_gly = non_gly + SG_count_dictionary[SG]
+
+            # update offset IF a variable offset was provided
+            if isinstance(offset, dict):
+                local_offset = offset['PEP_BB']
+
+            # if we are meant to updated PEP_BB - note, both of these compuet the addition to max_fos based on
+            # (1) number of residues we're on (SG), multiplied by the FOS_baseline value with/without offset
+            # multiplied by the BB_correction factor
+            if 'PEP_BB' in updated_SGs_to_modify:
+                max_fos = max_fos + SG_count_dictionary[SG]*(configs.FOS_baseline['PEP_BB'] + local_offset)*BB_correction_factor
+            else:
+                max_fos = max_fos + SG_count_dictionary[SG]*(configs.FOS_baseline['PEP_BB'])*BB_correction_factor
+
+    # .......................................................................................
+    # glycine            
+    # finally we deal with glycine - we compute the 
+    ngly = SG_count_dictionary['PEP_BB'] - non_gly
+
+    if isinstance(offset, dict):
+        local_offset = offset['PEP_BB']
+    else:
+        local_offset = offset
+
+    # note no BB_correction_factor because glycine BB are fully exposed by definition
+    if 'PEP_BB' in updated_SGs_to_modify:
+        max_fos = max_fos + ngly*(configs.FOS_baseline['PEP_BB']+local_offset)
+    else:
+        max_fos = max_fos + ngly*(configs.FOS_baseline['PEP_BB'])
+
+    return max_fos
+        
+
+
+
+
+## ...........................................................................
+##
+def get_delta_percentage_W_solvmax(target_percentage, SG_count_dictionary, updated_SGs_to_modify):#seq, percentage, AAgroup, PRO_PEP):
+    """
+
+    Parameters
+    ----------------
+
+    target_percentage : float
+        Target percentage we wish the percentage Delta W_{solv}^{max} to shift by
+
+    SG_count_dictionary: dictionary
+        Already parsed dictionary that contains key:value pairs of solvation group and count for 
+        the sequence
+
+    updated_SGs_to_modify : list
+        List that is a subset of the solvation groups in the SG_count_dictionary
+
+
+
+    """
+
+    if target_percentage == 0:
+        print("No offset required (target percentage change = 0)")
+        return 0
+
+    print("Input percentage: %3.3f " % target_percentage)
+
+
+    # fist compute the W_{solv}^{max} for the sequence under aqeous 
+    # conditions
+    wt_W_solv_max = get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, 0)
+
+    W_solv_max_resolution = 0.005
+
+    trajectory = []
+    offset = -W_solv_max_resolution
+
+
+    if target_percentage < 0:
+        PC = -1
+    else:
+        PC = 1
+    target_percentage=abs(target_percentage)
+
+    delta_percentage_W_solv_max = 100*( (get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset) - wt_W_solv_max)/wt_W_solv_max)
+
+    while delta_percentage_W_solv_max < target_percentage:
+        offset = offset - W_solv_max_resolution
+        delta_percentage_W_solv_max = 100*( (get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset) - wt_W_solv_max)/wt_W_solv_max)
+        trajectory.append(delta_percentage_W_solv_max)
+
+    # check which of the two values that straddle the boundary is closed and choose the best of the two
+    
+    if abs(trajectory[-2]-target_percentage) < abs(delta_percentage_W_solv_max - target_percentage):
+        offset = offset - W_solv_max_resolution
+        delta_percentage_W_solv_max = trajectory[-2]
+
+
+    # if we have a negative we are reducing the RFOS 
+    if PC < 0:
+        offset = -offset
+        delta_percentage_MTFE = -delta_percentage_W_solv_max
+
+    print("Offset of %4.2f to groups %s gives a percent of %2.2f (original = %5.1f kcal/mol, rewired = %5.1f kcal/mol) " %(offset, updated_SGs_to_modify, delta_percentage_W_solv_max, wt_W_solv_max, get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset)))
+
+    return offset
+
+
+
+
+
+
+## ...........................................................................
+##
+def get_mtfe_derived_W_solv_max(FOS_offset, original_fos, solvation_group_count, PRO_PEP):
+    """
+    FOSS_offset is the off
+
+    """
+    original_fos = 0.0
+
+    solvation_groups = list(original_fos.keys())
+
+    BB_count = 0
+    BB_PRO_count = 0
+
+"""
     # for each sidechain
-    for AA in AAs:
+    for sg in solvation_groups:
+        
+        #if sg == ''
+
+        c = solvation_group_count[sg]
+
+        original_fos = original_fos + c*original_fos[sg]
+
+        if sg == 'PRO' and c >0:
+            BB_PRO_count = c
+        else:
+            BB_count = BB_count + c
+
+
+    original_fos = original_fos
+            
+
+original_[AA_IDX]*(FOS_baseline[INT2AA[AA_IDX]]+offset);
         
         AA_IDX=AA2INT[AA]
         
         # if sidechain group is being changed
         if AA in group:
+            pass
 
             # sidechain max possible FOS with offset set
-            max_fos = max_fos + resvector[AA_IDX]*(FOS_baseline[INT2AA[AA_IDX]]+offset);
+            
         else:
+            pass
 
             # sidechain max possible FOS (no offset)
             max_fos = max_fos + resvector[AA_IDX]*FOS_baseline[INT2AA[AA_IDX]];
@@ -170,11 +272,14 @@ def get_group_specific_FOS(resvector, group, offset):
         # if backbone not going to be changed then deal with this here
         if 'B' not in group:
 
-            # and backbone max possible FOS (no offset) with fractional correction cos sidechains take up space!
-            BB_corection_factor = (SASA_MAX[AA_IDX][1]/SASA_MAX[5][1]) # BB correction for presence of sidechain
-            max_fos = max_fos + resvector[AA_IDX]*backbone_baseline*BB_corection_factor
-
-
+            if PRO_PEP and AA == 'P':
+                BB_correction_factor = 1 # BB correction for presence of proline - assume that no correction needed
+                max_fos = max_fos + resvector[AA_IDX]*pro_backbone_baseline*BB_correction_factor
+                
+            else:                
+                # and backbone max possible FOS (no offset) with fractional correction cos sidechains take up space!
+                BB_correction_factor = (SASA_MAX[AA_IDX][1]/SASA_MAX[5][1]) # BB correction for presence of sidechain
+                max_fos = max_fos + resvector[AA_IDX]*backbone_baseline*BB_correction_factor
 
     # if backbone is being corrected then we DID NOT include it in the previous loop and we deal woth it here..
     if 'B' in group:
@@ -185,152 +290,12 @@ def get_group_specific_FOS(resvector, group, offset):
             # sidechains have already been dealt with so if 'B' was in group we are now JUST adjusting the backbone
 
             # and backbone max possible FOS (no offset)
-            BB_corection_factor = (SASA_MAX[AA_IDX][1]/SASA_MAX[5][1]) # BB correction for presence of sidechain
-            max_fos = max_fos + resvector[AA_IDX]*(backbone_baseline+offset)*BB_corection_factor
+            if PRO_PEP and AA == 'P':
+                BB_correction_factor = 1 # BB correction for presence of proline - assume that no correction needed
+                max_fos = max_fos + resvector[AA_IDX]*(pro_backbone_baseline+offset)*BB_correction_factor
+            else:
+                BB_correction_factor = (SASA_MAX[AA_IDX][1]/SASA_MAX[5][1]) # BB correction for presence of sidechain
+                max_fos = max_fos + resvector[AA_IDX]*(backbone_baseline+offset)*BB_correction_factor
     
     return max_fos
-
-
-## ...........................................................................
-##
-def build_resvector(s):
-    """
-    Function that returns a 20-place array with the counts for each residue type
-    """
-
-    return_vector = [] 
-    for A in AAs:
-        return_vector.append(s.count(A))
-
-    return return_vector
-
-
-
-## ...........................................................................
-##
-def run_normalization(seq, AA_groups, FOS_offset_vector, prefix=None, percent=False):
-
-    seq = sanitize_sequence(seq)
-    resvector = build_resvector(seq)
-
-    return_matrix=[]
-
-    print_sanity_checks(resvector,seq, FOS_offset_vector)
-    
-    for group in AA_groups:
-        gvector=[]
-        for offset in FOS_offset_vector:
-            gvector.append(get_group_specific_FOS(resvector, group, offset))
-        return_matrix.append(gvector)
-
-    if prefix:        
-        np.savetxt('%s_MTFE_values.csv' % (prefix), np.array(return_matrix).transpose(),delimiter=', ')
-        np.savetxt('%s_MTFE_values_used.csv' % (prefix), FOS_offset_vector, delimiter=', ')
-    else:
-        np.savetxt('MTFE_values.csv', np.array(return_matrix).transpose(),delimiter=', ')
-        np.savetxt('MTFE_values_used.csv', FOS_offset_vector, delimiter=', ')
-
-
-
-## ...........................................................................
-##
-def run_normalization_with_percent(seq, AA_groups, FOS_percent_vector, prefix=None):
-    """
-    Note that for every group a % is the same, but we just create this redundant 
-    output file so both types of analysis scripts work on the same input
-    
-    """
-
-    seq = sanitize_sequence(seq)
-    resvector = build_resvector(seq)
-
-    return_matrix=[]
-
-    print_sanity_checks(resvector,seq, FOS_percent_vector)
-
-    # first calculate value without any percentage changes
-    local_wt_MTFE = get_group_specific_FOS(resvector, 'B', 0)
-    
-    # compute the offset vector first
-    FOS_offset_vector = []
-    for pcnt in FOS_percent_vector:
-            offset_fos = abs(local_wt_MTFE)*(abs(pcnt)/100.0)            
-            if pcnt < 0:
-                FOS_offset_vector.append(+offset_fos)
-            else:
-                FOS_offset_vector.append(-offset_fos)
-
-
-            
-
-    
-    for group in AA_groups:
-
-        gvector=[]
-
-        for FO in FOS_offset_vector:
-            gvector.append(local_wt_MTFE+FO)
-
-        return_matrix.append(gvector)
-
-    if prefix:        
-        np.savetxt('%s_MTFE_values.csv' % (prefix), np.array(return_matrix).transpose(),delimiter=', ')
-        np.savetxt('%s_MTFE_values_used.csv' % (prefix), FOS_offset_vector, delimiter=', ')
-    else:
-        np.savetxt('MTFE_values.csv', np.array(return_matrix).transpose(),delimiter=', ')
-        np.savetxt('MTFE_values_used.csv', FOS_offset_vector, delimiter=', ')
-
-
-## ...........................................................................
-##
-def get_delta_percentage_MTFEs(seq, percentage, AAgroup):
-
-    if percentage < 0 or percentage > 100:
-        Exception("Percentage must be between 0 and 100")
-
-
-    if percentage == 0:
-        print("No offset required (target percentage change = 0)")
-        return 0
-
-    print("Input percentage: %3.3f " % percentage)
-    seq = sanitize_sequence(seq)
-    resvector = build_resvector(seq)
-
-    wt_MTFE = get_group_specific_FOS(resvector, AAgroup, 0)
-    MTFE_resolution = 0.005
-
-    trajectory=[]
-    offset = -MTFE_resolution
-
-
-    if percentage < 0:
-        PC = -1
-    else:
-        PC = 1
-    percentage=abs(percentage)
-
-    delta_percentaget_MTFE = 100*((get_group_specific_FOS(resvector, AAgroup, offset) - wt_MTFE)/wt_MTFE)
-
-    while delta_percentaget_MTFE < percentage:
-        offset=offset-MTFE_resolution
-        delta_percentaget_MTFE = 100*((get_group_specific_FOS(resvector, AAgroup, offset)-wt_MTFE)/wt_MTFE)
-        trajectory.append(delta_percentaget_MTFE)
-
-    # check which of the two values that straddle the boundary is closed and choose the best of the two
-    
-    if abs(trajectory[-2]-percentage) < abs(delta_percentaget_MTFE-percentage):
-        offset=offset-MTFE_resolution
-        delta_percentaget_MTFE = trajectory[-2]
-
-
-    # if we have a negative we are reducing the RFOS 
-    if PC < 0:
-        offset=-offset
-        delta_percentaget_MTFE=-delta_percentaget_MTFE
-
-    print("Offset of %4.2f to groups [%s] gives a delta MTFE percent of %2.2f (original = %5.1f kcal/mol, rewired = %5.1f kcal/mol) " %(offset, AAgroup, delta_percentaget_MTFE, wt_MTFE, get_group_specific_FOS(resvector, AAgroup, offset)))
-
-    return offset
-
-
+"""

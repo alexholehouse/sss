@@ -9,10 +9,11 @@ import numpy as np
 import argparse
 
 # import local configuration files
-from solutionspacescanner.configs import VALID, VALID_2_ONELETTER, SPACER_1
+from solutionspacescanner.configs import SPACER_1
 from solutionspacescanner import fos_calcs
 from solutionspacescanner import io_functions
 import solutionspacescanner
+
 
 
 ############################################################################################
@@ -24,16 +25,28 @@ if __name__=="__main__":
     parser.add_argument("-r", help="Residue string (format ALA_CYS_ASP_GLU etc.") 
     parser.add_argument("--fos_offset", help="Offset free energy of solvation being applied to each residue") 
     parser.add_argument("--fos_value",  help="Absolute value of the free energy of solvation being applied to each residue") 
-    parser.add_argument("--fos_percentage",  help="Percentage delta WSM (between -100 and +100) value. If set MUST also provide a sequence")     
-    parser.add_argument("--sequence",  help="Protein sequence used to calculate percentage delta WSM ")     
+    parser.add_argument("--fos_percentage",  help="A percentage as defined as phi (between -100 and +100) value. If set MUST also provide a sequence")     
+    parser.add_argument("--sequence",  help="Protein sequence used to calculate Phi ")     
     parser.add_argument("-o", help="Output filename") 
+    parser.add_argument("--proline-pep", help="If included, proline backbone is altered like the peptide backbone (default off)", action='store_true')
+    parser.add_argument("--mtfe_file", help="MTFE file that contains a mapping of residue to MTFE and a scaling factor")
+    parser.add_argument("--version", help="Print the current version string",action='store_true')
+    
+
+    # parse all passed arguments and set assumed default FOS_MODE
+    args = parser.parse_args()
+
+    if args.version:
+        print('Version: %s (%s)' % (solutionspacescanner.__version__, solutionspacescanner.release_date))
+        exit(0)
 
     print("------------------------------------------------")
     print("  SolutionSpaceScanner (sss) version [%s] (%s)              " % (solutionspacescanner.__version__, solutionspacescanner.release_date))
     print("------------------------------------------------")
+        
+        
 
-    # parse all passed arguments and set assumed default FOS_MODE
-    args = parser.parse_args()
+    # default mode initialized to zero
     FOS_MODE = 0
 
     # parse input file (ABSINTH parameter file)
@@ -46,89 +59,144 @@ if __name__=="__main__":
         content = io_functions.readfile(args.f)
         del content
 
-    # parse residue string
-    if not args.r:
+    # if proline corrections to be included 
+    if args.proline_pep:
+        PRO_PEP = True
+    else:
+        PRO_PEP = False
+
+    # if we didn't pass a residue string OR an MTFE file this is a problem - display
+    # an error and QUIT
+    if not args.r and not args.mtfe_file:
         print("Please pass an input residue string (-r ALA_CYS_ASP_GLU etc.")
         print("Each residue with three letter code separated by an underscore")
         exit(1)
     else:
         
-        # note - ALL sanity checking done inside parse_residue_string and will error
-        # and exist automatically if things go awry
-        residues = io_functions.parse_residue_string(args.r)
-            
+        # if we did not parse an MTFE file...
+        if not args.mtfe_file:
 
-    ##
-    ## rewire_fos lets you re-set the free-energy of solvation for one or more groups in three possibe ways.
-    ## These are offset_mode, value_mode, and percentage_mode
+            # note - ALL sanity checking done inside parse_residue_string and will error
+            # and exist automatically if things go awry
+            SGs_to_modify = io_functions.parse_residue_string(args.r, PRO_PEP)
 
+    if args.sequence:
+        seq = io_functions.sanitize_sequence(args.sequence)
+
+
+    ## sss lets you re-set the free-energy of solvation for one or more groups in four possibe ways.
+    ## These are offset_mode, value_mode, percentage_mode, input file mode
+
+    # firstly, if an input file was provided this is the default approach
+    if args.mtfe_file:
+        FOS_MODE = 4
+
+        if args.proline_pep:
+            print('WARNING: --proline-pep flag has no impact when MTFE file is used...')
+        
+        # returns a dictionary where keys are solvation groups and values are
+        # offsets to be applied to those groups
+        FOS_offset = io_functions.parse_mtfe_file(args.mtfe_file)
+
+        # makes sure we update ALL residues 
+        SGs_to_modify = io_functions.parse_residue_string('all')
+
+
+        
+        # IF the sequence was provided and we know the per-residue change we can calculate
+        # Phi for this sequence
+        if args.sequence:
+            fos_calcs.bonus_phi(SGs_to_modify, seq, FOS_offset)
+        
+        # NOTE! We are OVERWRITING the updated_SGs_to_modify value above BECAUSE we are ONLY using this to calculate the
+        # phi value
+        updated_SGs_to_modify = SGs_to_modify
+        FOS_value = 0
+        print("Using MTFE file mode. Each residue will have an offset applied that is defined in the file [%s]" % (args.mtfe_file))
 
     # --------------------------------------------------------------------------------------------------
     # If --fos_offset is used, we define a value that is applied as a fixed offset to each group defined in the residue
     # string
     if args.fos_offset:
-
+        
+        if FOS_MODE == 4:
+            io_functions.error_exit("Can only apply changes one mode at a time")
         try:
             FOS_offset = float(args.fos_offset)
-        except:
+        except Exception:
             io_functions.error_exit("Could not convert the --FOS_offset value to a number [%s] " % args.fos_offset)
+
+        # IF the sequence was provided
+        if args.sequence:
+            fos_calcs.bonus_phi(SGs_to_modify, seq, FOS_offset)
 
         # finish up...
         FOS_value = 0 # set to default
-        updated_residues = residues
+        updated_SGs_to_modify = SGs_to_modify
         FOS_MODE = 1
         print("Using FOS offset mode. Each residue will have an offset of %5.5f applied" % (FOS_offset))
 
-
+        
     # --------------------------------------------------------------------------------------------------
     # If --fos_values is used, we define an absolute value (in kcal/mol) that is set as the FOS value
     if args.fos_value:
-        if FOS_MODE == 1:
+        if FOS_MODE in [1,4]:
             io_functions.error_exit("Passed both a FOS value and a FOS offset - please use only one")
 
         # finish up...
         FOS_value = float(args.fos_value)
+
         FOS_offset = 0 # set to default
         FOS_MODE = 2
-        updated_residues = residues
+        updated_SGs_to_modify = SGs_to_modify
+
+        print("Using FOS value mode. Each residue will be set to a value of %5.5f " % (FOS_value))
 
     # --------------------------------------------------------------------------------------------------
     # If --fos_percentage is used we calculate an fixed offset value that is determined such that the new
     # MTFE is changed from the 'aqeous' MTFE by this percentage. To do this we need to know what the protein
     # sequences is, as the MTFE is calculated based on the amino acids present
     if args.fos_percentage:
-        if FOS_MODE == 1 or FOS_MODE == 2:
+
+        # check we haven't already initialized another mode...
+        if FOS_MODE in [1,2,4]:
             io_functions.error_exit("Passed both a FOS percentage and a FOS offset or value - please use only one")
 
-        # finish up with FOS_MODE=3
+        # MUST have provided a sequence
         if not args.sequence:
             io_functions.error_exit("Must provide a valid amino acid sequence when using --fos_percentage")
             
         FOS_MODE = 3
-        
-        # figure out which of the residues that have been requested are actually relevant
-        updated_residues = fos_calcs.identify_used_residues(args.sequence, residues)
+            
+        # figure out which of the residues that have been requested are actually relevant and count the ABSOLUTE number 
+        # of EVERY solvation group in the protein
+        # After this  -> SG_count_dictionary is a dictionary that gives the number of EVERY solvation group present
+        #             -> updated_SGs_to_mofify is the subset of SGs that (a) we wanted to modify and (b) are present
+        #                within the SG_count_dictionary
+        (updated_SGs_to_modify, SG_count_dictionary) = io_functions.identify_used_residues(seq, SGs_to_modify)
 
-        # compute the fixed offset that means the delta percentage W_{solv}^{max} is true
-        FOS_offset = fos_calcs.compute_value_from_percentage(args.sequence, float(args.fos_percentage), updated_residues)        
+        # compute the fixed offset that means the requested phi value is true
+        FOS_offset = fos_calcs.compute_value_from_percentage(float(args.fos_percentage), SG_count_dictionary, updated_SGs_to_modify)
+
+        # print the result of this change for completeness
+        fos_calcs.bonus_phi(updated_SGs_to_modify, seq, FOS_offset)
 
         # set the FOS value to the default 
         FOS_value = 0 # default
-
-
+        print("Using FOS percentage value. Each residue will have an offset of %5.5f." % (FOS_offset))
 
     # if FOS_MODE was never set (i.e. no --fos_* was used)
     if FOS_MODE == 0:
         io_functions.error_exit("Please pass either a FOS (free energy of solvation) offset (--fos_offset) or a FOS value (--fos_value)")
 
-    # if we passed an outpfile set this, else use a default value for the output 'rewired' parameter file
+    # if we passed an outputfile set this, else use a default value for the output 'rewired' parameter file
     if args.o:
         outname = args.o
     else:
         outname = 'new_params.prm'
 
     # write out a new ABSINTH parameter file
-    io_functions.update_ABSINTH_parameter_file(args.f, outname, updated_residues, FOS_MODE, FOS_value, FOS_offset)
+    io_functions.update_ABSINTH_parameter_file(args.f, outname, updated_SGs_to_modify, FOS_MODE, FOS_value, FOS_offset)
 
 
     
