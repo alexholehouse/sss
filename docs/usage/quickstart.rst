@@ -7,11 +7,17 @@ Installation
 
 Installation of the **solutionspacescanner** scanner package provides the commandlinetool ``sss``, a general tool for rewiring ABINSTH parameter files.
 
-**solutionspacescanner** is available from PyPI. To install **solutionspacescanner** simply use `pip`:
+**solutionspacescanner** is available from PyPI. To install **solutionspacescanner** simply use **pip**:
+
+DOG
+
+.. code-block:: 
 
 	$ pip install solutionspacescanner
 
-To ensure installation was succesfull you can run the following command from your terminal::
+To ensure installation was succesfull you can run the following command from your terminal:
+
+.. code-block:: 
 
 	$ sss --version
 

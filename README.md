@@ -4,17 +4,27 @@ SolutionSpaceScanner
 [![Build Status](https://travis-ci.org/holehouse-lab/solutionspacescanner.svg?branch=master)](https://travis-ci.org/holehouse-lab/solutionspacescanner)
 [![Documentation Status](https://readthedocs.org/projects/solutionspacescanner/badge/?version=latest)](https://solutionspacescanner.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/holehouse-lab/solutionspacescanner/branch/master/graph/badge.svg)](https://codecov.io/gh/holehouse-lab/solutionspacescanner)
+[![PyPI version](https://badge.fury.io/py/solutionspacescanner.svg)](https://badge.fury.io/py/solutionspacescanner)
 
 
 
 **SolutionSpaceScanner** is a Python package implemented to generate ABSINTH parameter files that can be used for running solution space
-scanning simulations. Finalization of this repository is ongoing (including tests, final code changes etc). 
+scanning simulations.
 
-This code accompanies the paper [Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning](https://pubs.acs.org/doi/pdf/10.1021/acs.jctc.9b00604) accepted for publication in J. Chem. Theory Comput. in January 2020 and initially posted to biorxiv on August 30th 2019 from the [Holehouse](http://holehouselab.com) and [Sukenik](http://sukeniklab.com) labs.
+**SolutionSpaceScanner** accompanies the paper [Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning](https://pubs.acs.org/doi/pdf/10.1021/acs.jctc.9b00604) (Holehouse & Sukenik JCTC). 
+
+**SolutionSpaceScanner** was developed by the [Holehouse](http://holehouselab.com) and [Sukenik](http://sukeniklab.com) labs.
+
+### Installation
+
+	pip install solutionspacescanner
 
 ### Documentation
 Documentation (installation and usage) can [be found here](https://solutionspacescanner.readthedocs.io/en/latest/index.html).
 
+
+### References
+Holehouse, A. S. & Sukenik, S. Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning. J. Chem. Theory Comput. 16, 1794–1805 (2020).
 
 ### Copyright
 
