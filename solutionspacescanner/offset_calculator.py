@@ -202,7 +202,10 @@ def get_delta_percentage_W_solvmax(target_percentage, SG_count_dictionary, updat
     # check which of the two values that straddle the boundary is closed and choose the best of the two
     
     if abs(trajectory[-2]-target_percentage) < abs(delta_percentage_W_solv_max - target_percentage):
-        offset = offset - W_solv_max_resolution
+
+        # the + here means IF we find that the penultimate delta_percentage_W_solv_max is better we 
+        # step back and make the offset 
+        offset = offset + W_solv_max_resolution
         delta_percentage_W_solv_max = trajectory[-2]
 
 
@@ -211,7 +214,8 @@ def get_delta_percentage_W_solvmax(target_percentage, SG_count_dictionary, updat
         offset = -offset
         delta_percentage_MTFE = -delta_percentage_W_solv_max
 
-    print("Offset of %4.2f to groups %s gives a percent of %2.2f (original = %5.1f kcal/mol, rewired = %5.1f kcal/mol) " %(offset, updated_SGs_to_modify, delta_percentage_W_solv_max, wt_W_solv_max, get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset)))
+    print("Offset of %4.3f to groups %s gives a percent of %1.3f (original = %5.1f kcal/mol, rewired = %5.1f kcal/mol) " %(offset, updated_SGs_to_modify, delta_percentage_W_solv_max, wt_W_solv_max, get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset)))
+
 
     return offset
 

@@ -28,7 +28,6 @@ def get_explicit_phi(SG_count_dictionary, updated_SGs_to_modify, offset_dict):
     wt_wsolvmax      =  offset_calculator.get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, 0)
     altered_wsolvmax =  offset_calculator.get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset_dict)    
     phi = 100*( (altered_wsolvmax - wt_wsolvmax)/ wt_wsolvmax)
-
     
     return [phi, wt_wsolvmax, altered_wsolvmax]
     
