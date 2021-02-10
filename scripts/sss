@@ -89,6 +89,7 @@ if __name__=="__main__":
 
     # firstly, if an input file was provided this is the default approach
     if args.mtfe_file:
+
         FOS_MODE = 4
 
         if args.proline_pep:
@@ -100,8 +101,6 @@ if __name__=="__main__":
 
         # makes sure we update ALL residues 
         SGs_to_modify = io_functions.parse_residue_string('all')
-
-
         
         # IF the sequence was provided and we know the per-residue change we can calculate
         # Phi for this sequence
@@ -154,7 +153,7 @@ if __name__=="__main__":
 
     # --------------------------------------------------------------------------------------------------
     # If --fos_percentage is used we calculate an fixed offset value that is determined such that the new
-    # MTFE is changed from the 'aqeous' MTFE by this percentage. To do this we need to know what the protein
+    # MTFE is changed from the 'aqueous' MTFE by this percentage. To do this we need to know what the protein
     # sequences is, as the MTFE is calculated based on the amino acids present
     if args.fos_percentage:
 

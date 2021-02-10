@@ -8,7 +8,7 @@ Code that deals with parsing/reading/reporting input and output
 from time import gmtime, strftime
 
 from . import configs
-from .sssexception import sssException
+from .sssexception import SSSException
 from . import solutionspacescanner
 import os
 
@@ -33,16 +33,18 @@ def readfile(filename):
 ##
 def error_exit(msg):
     """
+
     Function that takes an error message, prints it in a nicely formatted way
-    and then triggers and exit with status 1
+    and then triggers an exit with a custom exception.
+
 
     """
     print("")
     print("###############################################################")
-    print("ERROR:  %s"  % str((msg)))
+    print("\nERROR:  %s"  % str((msg)))
     print("")
     print("###############################################################")
-    exit(1)
+    raise(SSSException('\n\nExiting gracefully. See error message above...'))
 
 
 
@@ -72,7 +74,6 @@ def parse_residue_string(rstring, PRO_PEP=False):
     """
     Function that takes an input residue string (ALA_CYS_ASP_...) and converts it into a list of valid
     solvation groups. 
-
 
     Notable functionality:
 
@@ -110,7 +111,8 @@ def parse_residue_string(rstring, PRO_PEP=False):
     valid_SGs              = configs.get_valid_solgroups()
     valid_3letter_residues = configs.get_valid_three_letter_residues()
 
-    # if 'all' passed we're using ALL solvation groups 
+    # if 'all' passed we're using ALL solvation groups. Note the remove lines
+    # here mean that the valid_SGs contain only HIE as the one 
     if rstring == 'all':
         print("Using residue grouping: 'all'\n")
         valid_SGs.remove('HIP')
@@ -155,7 +157,7 @@ def parse_residue_string(rstring, PRO_PEP=False):
     # if this falg was true, and IF we had added the peptide backbone then ALSO add the
     # proline backbone
     if PRO_PEP:
-        if  'PEP_BB' in return_SGs:            
+        if 'PEP_BB' in return_SGs:            
             return_SGs.append('PEP_PRO_BB')
 
     # finally remove any duplicates and sort for consistent behaviour
@@ -179,6 +181,21 @@ def identify_used_residues(sequence, SGs_to_modify):
 
     (2) calculates a dictionary mapping the number of each SG to its official
         SG name
+
+
+    For some further explanation:
+
+    This code is ONLY run when computing a percentage Phi value. The SGs_to_modify
+    is a list of parsed solvation groups as built from the residue string 
+    (i.e. -r ALA_CYS_HIS...). This string is actually parsed by the function
+    parse_residue_string().
+
+    The seqeuence variable is the one-letter amino acid string for the amino acid
+    sequence.
+
+    This function filters out the SGs_to_modify based on the 
+
+    
 
     Parameters
     ----------
@@ -230,7 +247,8 @@ def identify_used_residues(sequence, SGs_to_modify):
             SG_count_dictionary = addtodict(SG_count_dictionary, 'PEP_BB')
             continue
 
-        # if proline incrememnt proline backbone and proline sidechain
+        # if proline incrememnt proline backbone and proline sidechain - note this means we 
+        # do NOT increment the PEP_BB when we get a proline
         elif position == 'P':
             SG_count_dictionary = addtodict(SG_count_dictionary, 'PRO')
             SG_count_dictionary = addtodict(SG_count_dictionary, 'PEP_PRO_BB')            
@@ -238,16 +256,17 @@ def identify_used_residues(sequence, SGs_to_modify):
 
         elif position == 'H':
 
-
-            # if multiple HIS variants were passed to modify (this but of code counts if more than one of HIS/HIE/HIP is in SGs_to_modify
-            local=0
+            # if multiple types of histidine were passed to modify then this should fail.
+            # This bit of code counts if any of the histidine three-letter codes were passed (note that HIS->HIE in the parse_residue_string() function
+            # so the ONLY possible histidine codes here will be HIE, HID, or HIP
+            local = 0
             for d in ['HIE','HID','HIP']:
                 if d in SGs_to_modify:
                     local = local + 1
-            if local > 0:
+            if local > 1:
                 error_exit('Currently there is no way to distinguish between different histidine residues, please only try and modify one of HIS/HIE/HID/HIP')
 
-            # if exactly one type of histinde was passed we're going to assume ALL histdines in the sequence are of this type and modify all
+            # if exactly one type of histidine was passed we're going to assume ALL histdines in the sequence are of this type and modify all
             elif len(set(SGs_to_modify).intersection(['HIE','HID','HIP']))  == 1:
 
                 # get the SG
@@ -257,7 +276,7 @@ def identify_used_residues(sequence, SGs_to_modify):
                 SG_count_dictionary = addtodict(SG_count_dictionary, 'PEP_BB')        
                 
             # else a HIS is in the sequence but we're not modifying histidine, so let's just use the default based on the
-            # OENLETTER_TO_SOLVATION_GROUP mapping
+            # OENLETTER_TO_SOLVATION_GROUP mapping (i.e. sg will be HIE)
             else:
                 pass
                     
@@ -270,8 +289,9 @@ def identify_used_residues(sequence, SGs_to_modify):
     ##
     ## STAGE 2: Cross-reference 
     ##
-    updated_SGs_to_modify=[]
-    firstime=True # this is actually for nice warning formatting...
+    #print(SGs_to_modify)
+    updated_SGs_to_modify = []
+    firstime = True # this is actually for nice warning formatting...
     for sg in SGs_to_modify:
         if sg in SG_count_dictionary:
             updated_SGs_to_modify.append(sg)
@@ -423,7 +443,7 @@ def parse_mtfe_file(mtfe_file):
 
     for i in MTFE_RETURN:
         if i == 'SCALAR':
-            print('SCALAR factor set to %3.3f'%(MTFE_RETURN[i]))
+            print('SCALAR factor set to %3.3f' % (MTFE_RETURN[i]))
             continue
         else:
             # convert cal/mol/res to kcal/mol/res

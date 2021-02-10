@@ -5,6 +5,7 @@ Unit and regression test for io_functions.py
 # Import package, test suite, and other packages as needed
 import solutionspacescanner
 from solutionspacescanner import io_functions, configs
+from solutionspacescanner.sssexception import SSSException 
 import pytest
 import sys
 import random
@@ -41,10 +42,8 @@ def test_error_exit():
     Test error_exit exits and returns 1 as error code
 
     """
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SSSException):
         io_functions.error_exit('testing')
-    assert e.type == SystemExit
-    assert e.value.code == 1
 
 def test_sanitize_sequence():
     """
@@ -52,10 +51,9 @@ def test_sanitize_sequence():
 
     # check bad ones fail
     for d in ['APLSBLPLAPLAL', 'LKLPLPLALALAP.', 'ASDA-ASDASD']:
-        with pytest.raises(SystemExit) as e:
+        
+        with pytest.raises(SSSException):
             io_functions.sanitize_sequence(d)
-        assert e.type == SystemExit
-        assert e.value.code == 1
 
     # check good ones work
     for d in ['asLPASLPAlal', 'AcDeFGhIKlMnPqRsTvWy']:
@@ -77,10 +75,8 @@ def test_parse_mtfe_file():
     for fn in filenames:
         full = '%s/%s'%(test_data_dir, fn)
 
-        with pytest.raises(SystemExit) as e:
+        with pytest.raises(SSSException):
             io_functions.parse_mtfe_file(full)
-        assert e.type == SystemExit
-        assert e.value.code == 1
         
     # check a good one works too!
     full = '%s/%s'%(test_data_dir, 'good_mtfe.mtfe')
@@ -88,6 +84,37 @@ def test_parse_mtfe_file():
 
     # expected length 
     assert len(x) == 23
+
+    # check values parsed OK (for scalar 7)
+    expected_out_scalar_7 = {'ALA': -0.032830000000000005, 'CYS': 0.0, 'ASP': 0.024849999999999997, 
+                             'GLU': 0.00434, 'PHE': -0.58177, 'ILE': -0.26900999999999997, 
+                             'LYS': -0.15932000000000002, 'LEU': -0.38199, 'MET': -0.33838, 
+                             'ASN': -0.27153, 'PRO': -0.12354999999999998, 'GLN': -0.38367, 
+                             'ARG': -0.14819, 'SER': -0.14392, 'THR': -0.15463, 'VAL': -0.15155, 
+                             'TRP': -0.99022, 'TYR': -0.31556, 'PEP_BB': -0.273, 
+                             'PEP_PRO_BB': -0.273, 'HIE': -0.35357, 'HID': -0.35357, 'HIP': -0.35357}
+ 
+    for r in expected_out_scalar_7:
+        assert x[r] == expected_out_scalar_7[r]
+   
+
+    # check values parsed OK (for scalar 1)
+    full = '%s/%s'%(test_data_dir, 'good_mtfe_scalar_1.mtfe')
+    x = io_functions.parse_mtfe_file(full)
+    expected_out_scalar_1 = {'ALA': -0.004690000000000001, 'CYS': 0.0, 'ASP': 0.0035499999999999998, 
+                             'GLU': 0.00062, 'PHE': -0.08311, 'ILE': -0.03843, 
+                             'LYS': -0.022760000000000002, 'LEU': -0.05457, 'MET': -0.04834, 
+                             'ASN': -0.03879, 'PRO': -0.01765, 'GLN': -0.054810000000000005,
+                             'ARG': -0.02117, 'SER': -0.02056, 'THR': -0.02209, 'VAL': -0.02165,
+                             'TRP': -0.14146, 'TYR': -0.045079999999999995, 'PEP_BB': -0.039, 
+                             'PEP_PRO_BB': -0.039, 'HIE': -0.05051, 'HID': -0.05051, 'HIP': -0.05051}
+
+    
+    for r in expected_out_scalar_1:
+        assert x[r] == expected_out_scalar_1[r]
+
+
+    print(x)
 
 
 def test_identify_used_residues():
@@ -113,18 +140,13 @@ def test_identify_used_residues():
 
 
     # can't distingsuih different types of HIS in sequence
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SSSException):
         input_SGs= ['HIS','HIE','HIP']
         x = io_functions.identify_used_residues('ALPLALPAHLPHAPLPALPA', input_SGs)
-    assert e.type == SystemExit
-    assert e.value.code == 1
 
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SSSException):
         input_SGs = ['VAL']
         x = io_functions.identify_used_residues('ALPLALPALPAPLPALPA', input_SGs)
-    assert e.type == SystemExit
-    assert e.value.code == 1
-
 
     
     
@@ -137,24 +159,18 @@ def test_parse_residue_string():
 
 
     # first test empty string is appropiately dealt with (should error and exit)
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SSSException):
         io_functions.parse_residue_string('')
-    assert e.type == SystemExit
-    assert e.value.code == 1
     
     # next test invalid also trigger an exit with (1)
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SSSException):
         io_functions.parse_residue_string('ABA_DOG_CAT')
-    assert e.type == SystemExit
-    assert e.value.code == 1
 
 
     # next test invalid also trigger an exit with (1) because
     # we ignore glycine
-    with pytest.raises(SystemExit) as e:
+    with pytest.raises(SSSException):
         io_functions.parse_residue_string('ABA_DOG_CAT_GLY')
-    assert e.type == SystemExit
-    assert e.value.code == 1
 
     # however should be able to extract ALA
     r = io_functions.parse_residue_string('ABA_DOG_CAT_ALA')
@@ -194,8 +210,4 @@ def test_parse_residue_string():
         
     
     
-        
-
-        
-
-                          
+       

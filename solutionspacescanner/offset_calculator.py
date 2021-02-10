@@ -74,13 +74,13 @@ def get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset):
             local_offset = offset
 
         # .......................................................................................
-        # sidechain
+        # FIRST compute sidechain contribution
             
-        # we deal with backbones explicitly below...
+        # we deal with non-proline backbones explicitly below, while proline backbone is dealt with 
         if SG == 'PEP_BB' or SG == 'PEP_PRO_BB':
             continue
 
-        # if that group is in the set to modify
+        # if that group is in the set to modify (note that this includes proline sidechain here)
         if SG in updated_SGs_to_modify:            
             max_fos = max_fos + SG_count_dictionary[SG]*(configs.FOS_baseline[SG] + local_offset);
         else:
@@ -127,19 +127,20 @@ def get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset):
 
     # .......................................................................................
     # glycine            
-    # finally we deal with glycine - we compute the 
-    ngly = SG_count_dictionary['PEP_BB'] - non_gly
+    # finally we deal with glycine - note we have the 'IF' statement here BASICALLY as the edge
+    if 'PEP_BB' in SG_count_dictionary: 
+        ngly = SG_count_dictionary['PEP_BB'] - non_gly
 
-    if isinstance(offset, dict):
-        local_offset = offset['PEP_BB']
-    else:
-        local_offset = offset
+        if isinstance(offset, dict):
+            local_offset = offset['PEP_BB']
+        else:
+            local_offset = offset
 
-    # note no BB_correction_factor because glycine BB are fully exposed by definition
-    if 'PEP_BB' in updated_SGs_to_modify:
-        max_fos = max_fos + ngly*(configs.FOS_baseline['PEP_BB']+local_offset)
-    else:
-        max_fos = max_fos + ngly*(configs.FOS_baseline['PEP_BB'])
+        # note no BB_correction_factor because glycine BB are fully exposed by definition
+        if 'PEP_BB' in updated_SGs_to_modify:
+            max_fos = max_fos + ngly*(configs.FOS_baseline['PEP_BB']+local_offset)
+        else:
+            max_fos = max_fos + ngly*(configs.FOS_baseline['PEP_BB'])
 
     return max_fos
         
@@ -149,7 +150,7 @@ def get_offset_W_solv_max(SG_count_dictionary, updated_SGs_to_modify, offset):
 
 ## ...........................................................................
 ##
-def get_delta_percentage_W_solvmax(target_percentage, SG_count_dictionary, updated_SGs_to_modify):#seq, percentage, AAgroup, PRO_PEP):
+def get_delta_percentage_W_solvmax(target_percentage, SG_count_dictionary, updated_SGs_to_modify):
     """
 
     Parameters
