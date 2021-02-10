@@ -28,16 +28,20 @@ Solution space scanning
 
 The intrinsic tunability built into the ABSINTH model allows us to modulate the underlying free energies of solvation for different groups, allowing us to create chemically distinct solution conditions. This lets us ask how different types of solution environments may influence the conformational biases associated with a given polypeptide. For example, we can make a solution in which the backbone-solvent interactions become much less favorable than they would otherwise be (a more positive reference free energy of solvation).
 
-We recently proposed that the systematic variation of the solution environment could be used as a way to fundamentally alter the conformational behavior of intrinsically disordered proteins. In much the same way that saturation mutagenesis allows for the role of sequence on conformational behaviour to be interrogated via a "sequence space scan", varying the solution environment allows for a "solution space scan". This approach was leveraged to examine how distinct solutions influence the behaviour of different intrinsically disordered proteins [1].
+We recently proposed that the systematic variation of the solution environment could be used as a way to fundamentally alter the conformational behavior of intrinsically disordered proteins. In much the same way that saturation mutagenesis allows for the role of sequence on conformational behaviour to be interrogated via a "sequence space scan", varying the solution environment allows for a "solution space scan". This approach was leveraged to examine how distinct solutions influence the behaviour of different intrinsically disordered proteins [1,4].
 
+
+How to cite
+*************************
+If you use the **SolutionSpaceScanner** code in your project please cite the original paper [1].
 
 References
 ***********
 
-[1] Holehouse, A.S., and Sukenik, S. (2020) Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning, JCTC - online access (`Access article <https://pubs.acs.org/doi/pdf/10.1021/acs.jctc.9b00604>`_)
+[1] Holehouse, A.S., and Sukenik, S. (2020) Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning, **J. Chem. Theory. Comp.** 16:1794-1805 (`Access article <https://pubs.acs.org/doi/pdf/10.1021/acs.jctc.9b00604>`_)
 
-[2] Vitalis, A., and Pappu, R.V. (2009). Methods for Monte Carlo Simulations of Biomacromolecules. In Annual Reports in Computational Chemistry, R.A. Wheeler, ed. (Elsevier), pp. 49–76.
+[2] Vitalis, A., and Pappu, R.V. (2009). Methods for Monte Carlo Simulations of Biomacromolecules. In Annual Reports in Computational Chemistry, R.A. Wheeler, ed. (Elsevier), pp. 49-76.
 
-[3] Vitalis, A., and Pappu, R.V. (2009). ABSINTH: A new continuum solvation model for simulations of polypeptides in aqueous solutions. J. Comput. Chem. 30, 673–699.
+[3] Vitalis, A., and Pappu, R.V. (2009). ABSINTH: A new continuum solvation model for simulations of polypeptides in aqueous solutions. J. Comput. Chem. 30, 673-699.
 
-
+[4] Moses D, Yu F, Ginell GM, Shamoon NM, Koenig PS, Holehouse AS, et al. Revealing the Hidden Sensitivity of Intrinsically Disordered Proteins to their Chemical Environment. J Phys Chem Lett. 2020;11: 10131-10136.

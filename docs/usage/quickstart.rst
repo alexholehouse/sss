@@ -9,8 +9,6 @@ Installation of the **solutionspacescanner** scanner package provides the comman
 
 **solutionspacescanner** is available from PyPI. To install **solutionspacescanner** simply use **pip**:
 
-DOG
-
 .. code-block:: 
 
 	$ pip install solutionspacescanner
@@ -122,7 +120,7 @@ As you can see, all the aliphatic hydrophobes defined in the input residue strin
 MTFE File format
 ****************
 
-An MTFE file is a tab-separated input file for which each every solvation group should have a key-value pair. Comments can be included and should be defined using the '#' symbol. An aexample of a valid MTFE file is included below::
+An MTFE file is a tab-separated input file for which each every solvation group should have a key-value pair. Comments can be included and should be defined using the '#' symbol. An example of a valid MTFE file is included below::
 
 	#
 	# Units in in cal/mol/res
@@ -152,14 +150,9 @@ An MTFE file is a tab-separated input file for which each every solvation group 
 	PEP_BB  -50
 	PEP_PRO_BB  -30
 
-Note that EVERY single one of these solvation groups MUST be defined. Finally, the SCALAR keyword defines a fixed multiplier that is used when each of these values. The scalar is useful when calibrating experimental data with ABSINTH.
+Note that EVERY single one of these solvation groups MUST be defined. Finally, the SCALAR keyword defines a fixed multiplier that is used when each of these values. The scalar is useful when calibrating experimental data with ABSINTH. Essentially, the SCALAR just multiplies all the values by some fixed constant. This was introduced because (for example) we found that when calibrating against 1 M urea values, we need a multipler such that the helicity responded appropriately to changes in urea concentration in moles. Assuming a linear scaling, then, 1 M = SCALAR 7, 2 M = SCALAR 14, 3 M = SCALAR 21 and so on. 
 
 References
 ***********
 
-[1] Holehouse, A.S., and Sukenik, S. (2020) Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning, JCTC - online access (`Access article <https://pubs.acs.org/doi/pdf/10.1021/acs.jctc.9b00604>`_)
-
-
-.. [*] Note that ``solutionspacescanner`` will be added to PyPI in the near future.
-
-
+[1] Holehouse, A.S., and Sukenik, S. (2020) Controlling Structural Bias in Intrinsically Disordered Proteins Using Solution Space Scanning, **J. Chem. Theory. Comp.** 16:1794-1805 (`Access article <https://pubs.acs.org/doi/pdf/10.1021/acs.jctc.9b00604>`_)
